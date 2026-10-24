@@ -1,6 +1,6 @@
 # Concurrency Guard Engine
 
-> **High-Concurrency Financial Ledger, Race Condition Elimination & AI-Augmented CI/CD Code Sentinel**  
+> **SQLite Transactional Ledger, Idempotent Payments & Static Code Sentinel**
 > *Engineered by Paul Trafford ([@elura172](https://github.com/elura172)) · Tokyo Relocation Pipeline Candidate*
 
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
@@ -21,7 +21,7 @@ Simultaneously, engineering organizations are mandating **"AI-first development"
 3. **Thundering Herd Retries:** Naive fixed-interval retry loops (`time.sleep(1)`) overwhelming downstream payment switches.
 4. **Unrolled Exceptions:** Catch blocks swallowing database exceptions without issuing explicit rollbacks, leaking dirty session states.
 
-**Concurrency Guard Engine** solves both sides of this equation: providing an **atomic, lock-guarded transactional ledger** and an **automated CI/CD code sentinel** that catches concurrency anti-patterns in pull requests and generates automated patches.
+**Concurrency Guard Engine** is a runnable reference prototype for these concerns: a SQLite-backed transactional ledger and a static code sentinel that flags selected concurrency anti-patterns. The sentinel is a local analyzer; wiring it into pull request CI and validating its findings against real repositories remain integration work.
 
 ---
 
@@ -35,17 +35,16 @@ flowchart TD
     end
 
     subgraph Transaction Core
-        IDEM[SHA-256 Idempotency Key Registry]
-        LOCK[Fine-Grained Per-Wallet Mutex Locks]
+        IDEM[Persistent Idempotency Key Registry]
+        LOCK[SQLite or PostgreSQL Transaction]
         LEDGER[Atomic Mutation & Version Increment]
-        AUDIT[Immutable Cryptographic Audit Trail]
+        AUDIT[Transactional Audit Records]
     end
 
-    subgraph AI-Augmented Developer Tooling
-        PR[Developer PR Diff / AI Code Gen]
+    subgraph Static Developer Tooling
+        PR[Developer Source Code]
         SENTINEL[Concurrency Static Analyzer & Sentinel]
-        PATCH[Automated Remediation Patch Generator]
-        CI[CI/CD Merge Gate]
+        PATCH[Patch Suggestions]
     end
 
     QR --> API
@@ -56,8 +55,7 @@ flowchart TD
     LEDGER --> AUDIT
 
     PR --> SENTINEL
-    SENTINEL -->|Catch Race Anti-Patterns| PATCH
-    PATCH --> CI
+    SENTINEL -->|Flag Selected Patterns| PATCH
 ```
 
 ---
@@ -65,21 +63,27 @@ flowchart TD
 ## Core Capabilities
 
 ### 1. High-Concurrency Transactional Ledger
-* **Fine-Grained Mutex Locking:** Per-wallet lock registry preventing parallel worker threads from modifying a single balance simultaneously.
-* **Dual Concurrency Guards:** Combines pessimistic row-level locking with optimistic version counters (`version += 1`).
-* **Zero Double-Spends:** Verified under 50-thread concurrent contention bursts where multiple parallel requests race to drain a wallet.
+* **Database Transactions:** Each payment uses a separate SQLite connection and a `BEGIN IMMEDIATE` transaction. The balance check, debit, idempotency record, and audit insert commit or roll back together.
+* **SQLite:** Uses `BEGIN IMMEDIATE` and serializes writers database-wide for a dependency-free local run.
+* **PostgreSQL:** Pass a PostgreSQL DSN to use `SELECT ... FOR UPDATE` for per-wallet concurrency and a transaction-scoped advisory lock for idempotency keys. Unrelated wallets can proceed independently.
+* **Version Counter:** Settled debits increment a wallet version in the same transaction on either backend.
+* **Contention Check:** The included 50-thread burst verifies that ten ¥1,000 debits settle from a ¥10,000 wallet and remaining requests are rejected without a negative balance.
 
-### 2. Fast-Path Idempotency Registry
-* **Instant Replay:** Returns verified prior execution states in $<0.1\text{ ms}$ on duplicate QR scans or network retries without touching balance rows.
+### 2. Persistent Idempotency Registry
+* **Replay:** Returns the stored prior result on duplicate requests without changing the wallet balance.
 * **Tamper Detection:** Automatically rejects requests reusing an existing idempotency key with modified amounts as `CONFLICT`.
 
-### 3. AI-Augmented Static Code Sentinel
-* **CI/CD Quality Gate:** Analyzes pull request code diffs for financial anti-patterns:
+### 3. Static Code Sentinel
+* **Static Analysis Prototype:** Scans supplied Python source text for selected financial anti-patterns:
   * `PAY-001`: Unguarded balance read (missing `FOR UPDATE`).
   * `PAY-002`: Missing `Idempotency-Key` validation on mutation endpoints.
   * `PAY-003`: Fixed-interval retries lacking exponential backoff and jitter.
   * `PAY-004`: Exception blocks lacking explicit `db.rollback()`.
-* **Automated Remediation:** Generates syntax-checked drop-in patches directly in the review output.
+* **Patch Suggestions:** Emits suggested snippets. These are not applied or syntax-checked as drop-in patches, and the analyzer is not yet integrated with a CI provider.
+
+### Scope and limitations
+
+This is a reference implementation, not a production payment system. The PostgreSQL adapter is still a small single-process application component; it does not supply connection pooling, migrations, API/authentication boundaries, or deployment controls. The audit table is append-only by convention in this application, not protected against privileged database edits. Production use needs broader fault and load testing.
 
 ---
 
@@ -93,14 +97,14 @@ The repository includes a 10-scenario canonical benchmark suite testing transact
 | `02_IDEMPOTENT_DUPLICATE_QR_REPLAY` | Duplicate QR scan returns cached result without double debit | Verified prior settlement | **PASS** |
 | `03_IDEMPOTENCY_PAYLOAD_TAMPER_CONFLICT` | Idempotency key reused with altered amount rejected | Rejected as CONFLICT | **PASS** |
 | `04_INSUFFICIENT_FUNDS_SAFETY_REJECTION` | Overdraft attempt rejected cleanly without balance drift | Status: INSUFFICIENT_FUNDS | **PASS** |
-| `05_SENTINEL_UNGUARDED_BALANCE_READ` | Code review bot catches missing `FOR UPDATE` lock | Caught Rule PAY-001 | **PASS** |
-| `06_SENTINEL_NON_IDEMPOTENT_ENDPOINT` | CI bot flags endpoint missing Idempotency-Key header | Caught Rule PAY-002 | **PASS** |
-| `07_SENTINEL_THUNDERING_HERD_RETRY` | CI bot detects retry loop without exponential backoff & jitter | Caught Rule PAY-003 | **PASS** |
-| `08_SENTINEL_MISSING_TRANSACTION_ROLLBACK` | CI bot flags exception block lacking explicit db.rollback() | Caught Rule PAY-004 | **PASS** |
-| `09_SENTINEL_CLEAN_DIFF_APPROVAL` | Verified idiomatic code with locks approved for merge | Status: safe_to_merge=True | **PASS** |
-| `10_IMMUTABLE_AUDIT_VERSIONING` | Every atomic debit writes version increment and SHA-256 hash | Verified version & audit log | **PASS** |
+| `05_SENTINEL_UNGUARDED_BALANCE_READ` | Static analyzer checks for missing `FOR UPDATE` lock | Caught Rule PAY-001 | **PASS** |
+| `06_SENTINEL_NON_IDEMPOTENT_ENDPOINT` | Static analyzer checks endpoint idempotency header | Caught Rule PAY-002 | **PASS** |
+| `07_SENTINEL_THUNDERING_HERD_RETRY` | Static analyzer checks retry loops for backoff and jitter | Caught Rule PAY-003 | **PASS** |
+| `08_SENTINEL_MISSING_TRANSACTION_ROLLBACK` | Static analyzer checks exception handling for rollback | Caught Rule PAY-004 | **PASS** |
+| `09_SENTINEL_CLEAN_DIFF_APPROVAL` | Static analyzer accepts its clean-code fixture | Status: safe_to_merge=True | **PASS** |
+| `10_AUDIT_VERSIONING` | Debit writes wallet version and SHA-256 payload hash to audit row | Verified version and audit record | **PASS** |
 
-**Benchmark Score:** **10 / 10 Passing (100.0%)**
+**Canonical demo benchmark:** **10 / 10 scenarios passed** in the local SQLite run. This is a functional check, not a production load benchmark.
 
 ---
 
@@ -109,9 +113,11 @@ The repository includes a 10-scenario canonical benchmark suite testing transact
 ### Prerequisites
 * Python 3.11+
 * [`uv`](https://github.com/astral-sh/uv) (recommended) or `pip`
+* SQLite (included with Python)
+* PostgreSQL 14+ and `uv sync --extra postgres` (optional PostgreSQL backend)
 
 ### 1. Run Interactive Terminal Demo
-Experience live 50-thread contention bursts, automated PR vulnerability scanning, and benchmark evals:
+Experience a 50-thread contention burst, a simulated source scan, and the benchmark suite:
 ```bash
 git clone https://github.com/elura172/concurrency-guard-engine.git
 cd concurrency-guard-engine
@@ -122,6 +128,26 @@ uv run demo.py
 ```bash
 uv run pytest -v
 ```
+
+The engine uses a temporary SQLite database by default. Pass a path to preserve state across engine instances:
+
+```python
+from src.engine.ledger import ConcurrencyPaymentEngine
+
+engine = ConcurrencyPaymentEngine("ledger.sqlite3")
+```
+
+For PostgreSQL, install the optional driver and pass a DSN:
+
+```bash
+uv sync --extra postgres
+```
+
+```python
+engine = ConcurrencyPaymentEngine("postgresql://user:password@localhost:5432/ledger")
+```
+
+PostgreSQL integration coverage runs when `CGE_TEST_POSTGRES_DSN` is set before pytest. Point it at a disposable test database; the test creates uniquely named wallet and audit rows.
 
 ---
 
@@ -136,7 +162,7 @@ concurrency-guard-engine/
 │   ├── models/
 │   │   └── types.py          # Wallet schemas, payment transactions, vulnerability rules
 │   ├── engine/
-│   │   └── ledger.py         # High-concurrency ledger, mutex locks & idempotency
+│   │   └── ledger.py         # SQLite transactions, idempotency & audit records
 │   ├── sentinel/
 │   │   └── analyzer.py       # Static code analyzer, concurrency rules & automated patches
 │   └── evals/

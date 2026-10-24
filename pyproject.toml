@@ -1,7 +1,7 @@
 [project]
 name = "concurrency-guard-engine"
 version = "0.1.0"
-description = "High-concurrency financial ledger, race condition elimination & AI-augmented CI/CD sentinel"
+description = "Transactional wallet ledger with SQLite and PostgreSQL concurrency control plus a static code sentinel"
 authors = [{ name = "Paul Trafford", email = "paul.trafford@protonmail.com" }]
 readme = "README.md"
 requires-python = ">=3.11"
@@ -10,6 +10,9 @@ dependencies = [
     "rich>=13.7.0",
     "pytest>=8.0.0",
 ]
+
+[project.optional-dependencies]
+postgres = ["psycopg[binary]>=3.2"]
 
 [build-system]
 requires = ["hatchling"]

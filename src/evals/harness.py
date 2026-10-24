@@ -1,5 +1,5 @@
 """
-Automated Evaluation Harness for Concurrency Safeguards & AI Developer Sentinels.
+Evaluation Harness for Transaction Invariants and the Static Code Sentinel.
 """
 from typing import Any, Dict, List
 from src.models.types import PaymentRequest, TransactionStatus
@@ -9,7 +9,7 @@ from src.sentinel.analyzer import ConcurrencySentinel
 
 class ConcurrencyBenchmarkSuite:
     """
-    10-Scenario canonical validation suite benchmarking payment transaction integrity and AI-assisted CI/CD code sentinels.
+    10-scenario functional suite checking payment transaction invariants and static sentinel fixtures.
     """
     def __init__(self):
         pass
@@ -117,7 +117,7 @@ class ConcurrencyBenchmarkSuite:
         if p5: passed += 1
         results.append({
             "scenario": "05_SENTINEL_UNGUARDED_BALANCE_READ",
-            "description": "Static code review bot catches missing 'FOR UPDATE' row lock on balance read",
+            "description": "Static analyzer catches missing 'FOR UPDATE' row lock on balance read",
             "passed": p5,
             "metric": f"Caught Rule {rep_5.vulnerabilities[0].rule_id if rep_5.vulnerabilities else 'NONE'}",
         })
@@ -133,7 +133,7 @@ class ConcurrencyBenchmarkSuite:
         if p6: passed += 1
         results.append({
             "scenario": "06_SENTINEL_NON_IDEMPOTENT_ENDPOINT",
-            "description": "CI bot flags charge endpoint lacking Idempotency-Key header validation",
+            "description": "Static analyzer flags charge endpoint lacking Idempotency-Key validation",
             "passed": p6,
             "metric": f"Caught Rule {rep_6.vulnerabilities[0].rule_id if rep_6.vulnerabilities else 'NONE'}",
         })
@@ -151,7 +151,7 @@ class ConcurrencyBenchmarkSuite:
         if p7: passed += 1
         results.append({
             "scenario": "07_SENTINEL_THUNDERING_HERD_RETRY",
-            "description": "CI bot detects fixed-interval retry loop lacking exponential backoff & jitter",
+            "description": "Static analyzer detects fixed-interval retry loop lacking backoff & jitter",
             "passed": p7,
             "metric": f"Caught Rule {rep_7.vulnerabilities[0].rule_id if rep_7.vulnerabilities else 'NONE'}",
         })
@@ -169,7 +169,7 @@ class ConcurrencyBenchmarkSuite:
         if p8: passed += 1
         results.append({
             "scenario": "08_SENTINEL_MISSING_TRANSACTION_ROLLBACK",
-            "description": "CI bot flags exception block failing to issue explicit db.rollback()",
+            "description": "Static analyzer flags exception block lacking explicit db.rollback()",
             "passed": p8,
             "metric": f"Caught Rule {rep_8.vulnerabilities[0].rule_id if rep_8.vulnerabilities else 'NONE'}",
         })
@@ -190,12 +190,12 @@ class ConcurrencyBenchmarkSuite:
         if p9: passed += 1
         results.append({
             "scenario": "09_SENTINEL_CLEAN_DIFF_APPROVAL",
-            "description": "Verified idiomatic payment code with row locks & idempotency approved for merge",
+            "description": "Static analyzer approves its clean-code fixture",
             "passed": p9,
             "metric": "Status: safe_to_merge=True (0 vulnerabilities)",
         })
 
-        # Scenario 10: Immutable Audit Log Versioning
+        # Scenario 10: Transactional Audit Record and Versioning
         engine_10 = ConcurrencyPaymentEngine()
         engine_10.create_wallet("w-ver-01", "user-tokyo-10", initial_balance_jpy=10000)
         for i in range(3):
@@ -212,7 +212,7 @@ class ConcurrencyBenchmarkSuite:
         p10 = wallet_10.version == 3 and wallet_10.balance_jpy == 7000 and len(engine_10._audit_ledger) == 3
         if p10: passed += 1
         results.append({
-            "scenario": "10_IMMUTABLE_AUDIT_VERSIONING",
+            "scenario": "10_AUDIT_VERSIONING",
             "description": "Every atomic debit increments wallet version and writes cryptographic audit record",
             "passed": p10,
             "metric": f"Wallet version: {wallet_10.version} | Audit records: {len(engine_10._audit_ledger)}",

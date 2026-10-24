@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Interactive Terminal Demo for PayPay: Concurrency Guard Engine & AI Developer Sentinel.
-Runs high-concurrency race contention tests, automated AST vulnerability scanning, and the 10-scenario benchmark suite.
+Interactive demo for the SQLite-backed Concurrency Guard Engine and static code sentinel.
+Runs a contention check, heuristic source scan, and the 10-scenario benchmark suite.
 """
 import sys
 import time
@@ -21,7 +21,7 @@ console = Console()
 def print_banner():
     banner_text = (
         "[bold cyan]PAYPAY // CONCURRENCY GUARD ENGINE[/bold cyan]\n"
-        "[dim]High-Concurrency Financial Ledger, Race Condition Elimination & AI CI/CD Sentinel[/dim]\n"
+        "[dim]SQLite Transactional Ledger & Static Code Sentinel[/dim]\n"
         "[dim white]Author: Paul Trafford (elura172) · Tokyo Relocation Pipeline Candidate[/dim white]"
     )
     console.print(Panel(banner_text, border_style="cyan", box=box.DOUBLE))
@@ -31,19 +31,19 @@ def run_live_contention_simulation():
     console.print("\n[bold yellow]▶ STEP 1: Live 50-Thread High-Concurrency Contention Burst[/bold yellow]")
     engine = ConcurrencyPaymentEngine()
     engine.create_wallet("wallet-shibuya-user-01", "user-tokyo-77", initial_balance_jpy=10000)
-    console.print("  [dim]Created test wallet: balance = ¥10,000 | Spawning 50 parallel worker threads attempting to debit ¥1,000 each...[/dim]")
+    console.print("  [dim]Created SQLite test wallet: balance = ¥10,000 | Spawning 50 parallel worker threads attempting to debit ¥1,000 each...[/dim]")
 
     burst = engine.execute_contention_burst("wallet-shibuya-user-01", total_requests=50, amount_per_request=1000)
 
     console.print(f"  Total Concurrent Requests: [bold]{burst['total_requests']}[/bold]")
     console.print(f"  Successfully Settled: [bold green]{burst['settled_count']} (¥{burst['settled_count'] * 1000:,})[/bold green]")
     console.print(f"  Rejected for Insufficient Funds: [bold yellow]{burst['insufficient_funds_count']}[/bold yellow]")
-    console.print(f"  Final Wallet Balance: [bold cyan]¥{burst['final_balance_jpy']:,}[/bold cyan] (Expected: ¥0 — [bold green]ZERO DOUBLE-SPENDS[/bold green])")
-    console.print(f"  Final Optimistic Lock Version: [dim]v{burst['final_wallet_version']}[/dim]")
+    console.print(f"  Final Wallet Balance: [bold cyan]¥{burst['final_balance_jpy']:,}[/bold cyan] (Expected: ¥0)")
+    console.print(f"  Final Wallet Version: [dim]v{burst['final_wallet_version']}[/dim]")
 
 
 def run_sentinel_simulation():
-    console.print("\n[bold yellow]▶ STEP 2: AI Developer Sentinel — PR Concurrency Vulnerability Scan[/bold yellow]")
+    console.print("\n[bold yellow]▶ STEP 2: Static Sentinel — Simulated Source Scan[/bold yellow]")
     sentinel = ConcurrencySentinel()
     
     vulnerable_pr = """
@@ -58,14 +58,14 @@ def run_sentinel_simulation():
     console.print("  [dim]Scanning simulated PR diff for financial race conditions...[/dim]")
     report = sentinel.scan_code(vulnerable_pr, "api/qr_checkout.py")
 
-    console.print(f"  PR Concurrency Status: [bold red]REJECTED FROM MERGE[/bold red]")
+    console.print(f"  Scan Result: [bold red]ISSUES FOUND[/bold red]")
     console.print(f"  Vulnerabilities Intercepted: [bold red]{len(report.vulnerabilities)}[/bold red]")
 
     for idx, v in enumerate(report.vulnerabilities, 1):
         console.print(f"\n  [bold red]Vulnerability {idx}: [{v.rule_id}] {v.vulnerability_type.value}[/bold red]")
         console.print(f"    Issue: {v.description}")
         console.print(f"    Problematic Code: [yellow]{v.problematic_code}[/yellow]")
-        console.print(f"    [bold green]AI Sentinel Automated Patch:[/bold green]\n    [dim green]{v.suggested_patch}[/dim green]")
+        console.print(f"    [bold green]Suggested Patch:[/bold green]\n    [dim green]{v.suggested_patch}[/dim green]")
 
 
 def run_benchmark():
