@@ -22,7 +22,7 @@ def print_banner():
     banner_text = (
         "[bold cyan]PAYPAY // CONCURRENCY GUARD ENGINE[/bold cyan]\n"
         "[dim]SQLite Transactional Ledger & Static Code Sentinel[/dim]\n"
-        "[dim white]Author: Paul Trafford (elura172) · Tokyo Relocation Pipeline Candidate[/dim white]"
+        "[dim white]Author: elura172 · Tokyo Relocation Pipeline Candidate[/dim white]"
     )
     console.print(Panel(banner_text, border_style="cyan", box=box.DOUBLE))
 

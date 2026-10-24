@@ -1,7 +1,7 @@
 # Concurrency Guard Engine
 
 > **SQLite Transactional Ledger, Idempotent Payments & Static Code Sentinel**
-> *Engineered by Paul Trafford ([@elura172](https://github.com/elura172)) · Tokyo Relocation Pipeline Candidate*
+> *Engineered by elura172 ([@elura172](https://github.com/elura172)) · Tokyo Relocation Pipeline Candidate*
 
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -175,8 +175,8 @@ concurrency-guard-engine/
 
 ## Author & Contact
 
-**Paul Trafford**  
+**elura172**  
 *AI Systems & Backend Infrastructure Engineer*  
 * **GitHub:** [github.com/elura172](https://github.com/elura172)  
-* **Email:** [paul.trafford@protonmail.com](mailto:paul.trafford@protonmail.com)  
+* **Email:** [228485553+elura172@users.noreply.github.com](mailto:228485553+elura172@users.noreply.github.com)  
 * **Target:** Tokyo Relocation Pipeline / PayPay Core Backend Engineering
